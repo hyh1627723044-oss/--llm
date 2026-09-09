@@ -1,0 +1,6 @@
+{
+  "name": "tactic-weaver", "private": true, "version": "0.1.0", "type": "module",
+  "scripts": {"dev": "tsx server/index.ts", "build": "tsc --noEmit && vite build", "start": "tsx server/index.ts --production", "test": "tsx --test tests/*.test.ts"},
+  "dependencies": {"react": "^19.1.1", "react-dom": "^19.1.1"},
+  "devDependencies": {"@types/node": "^22.18.0", "@types/react": "^19.1.12", "@types/react-dom": "^19.1.9", "typescript": "^5.9.2", "vite": "^7.1.5", "tsx": "^4.20.5", "@playwright/test": "^1.55.0"}
+}
