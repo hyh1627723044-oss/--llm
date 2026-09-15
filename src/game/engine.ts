@@ -14,7 +14,7 @@ export function createBattle(c:Campaign):Battle {
   const mult=ENCOUNTERS[c.stage].mult,hp=Math.round(d.hp*mult);
   units.push({id:`enemy-${i}`,name:boss?'重锤守门人':role==='guard'?'铁甲掠夺者':role==='archer'?'荒原弓手':'暗影追猎者',role,team:'enemy',x:role==='archer'?770:650,y:ENCOUNTERS[c.stage].roles.length===2?210+i*120:150+i*110,hp,maxHp:hp,damage:d.damage*mult,range:d.range,speed:d.speed*.94,period:d.period,cooldown:.6+i*.25,strategy:{...DEFAULT_STRATEGY,target:role==='assassin'?'ranged':'nearest'},upgrades:[],intent:'等待交战',face:-1,flash:0,dodgeCooldown:0,immune:0,counterUntil:0,rallyUntil:0});
  });
- return {stage:c.stage,time:0,phase:'ready',units,events:[],effects:[],damage:{},dodges:{}};
+ return {stage:c.stage,time:0,phase:'ready',units,events:[],effects:[],damage:{},damageTaken:{},dodges:{}};
 }
 function emit(b:Battle,type:BattleEvent['type'],actor:string,text:string){b.events.push({time:b.time,type,actor,text});if(b.events.length>400)b.events.shift();}
 function blocked(x:number,y:number){return x<35||x>865||y<56||y>480||OBSTACLES.some(o=>x>o.x-16&&x<o.x+o.w+16&&y>o.y-16&&y<o.y+o.h+16);}
@@ -37,9 +37,9 @@ function targetFor(b:Battle,u:Unit){
 function hit(b:Battle,u:Unit,t:Unit,heavy=false){
  if(t.hp<=0||t.immune>0)return;
  const counter=u.counterUntil>b.time&&u.upgrades.includes('counter');
- const damage=Math.round(u.damage*(heavy?2.1:1)*(counter?1.8:1)*(u.rallyUntil>b.time?1.25:1));
+ const damage=Math.min(t.hp,Math.round(u.damage*(heavy?2.1:1)*(counter?1.8:1)*(u.rallyUntil>b.time?1.25:1)));
  t.hp=Math.max(0,t.hp-damage);t.flash=.22;
- b.damage[u.id]=(b.damage[u.id]||0)+damage;
+ b.damage[u.id]=(b.damage[u.id]||0)+damage;b.damageTaken[t.id]=(b.damageTaken[t.id]||0)+damage;
  b.effects.push({kind:'hit',x:t.x,y:t.y-35,tx:t.x,ty:t.y-60,life:.7,maxLife:.7,color:counter?'#edcb78':t.team==='ally'?'#ec8b80':'#e8d9b0',text:`${counter?'反击 ':''}−${damage}`});
  emit(b,counter?'counter':'damage',u.id,`${u.name}${counter?'触发反击':heavy?'重击':'命中'}${t.name} · ${damage}`);
  if(counter){u.counterUntil=0;if(u.upgrades.includes('rally')){b.units.filter(v=>v.team===u.team&&v.hp>0).forEach(v=>v.rallyUntil=b.time+3);emit(b,'info',u.id,'协同追击：队友伤害提高 25%，持续 3 秒');}}
