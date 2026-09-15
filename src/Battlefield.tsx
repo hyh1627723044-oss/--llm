@@ -100,7 +100,8 @@ function miniature(c: Context, u: Unit, time: number) {
   }
   ellipse(c, 0, 3, boss ? 24 : 18, 6, '#07131bab');
   if (u.immune > 0) { c.globalAlpha = .55; ellipse(c, 0, 1, 25, 10, '#77d7cb20', '#89e7d2'); }
-  if (u.counterUntil > time || u.rallyUntil > time) ellipse(c, 0, 1, 23, 9, '#d9ba5020', '#d9ba5080');
+  if (u.counterUntil > time || u.rallyUntil > time || (u.empowerUntil??0)>time) ellipse(c, 0, 1, 23, 9, '#d9ba5020', '#d9ba5080');
+  if ((u.weakenUntil??0)>time) ellipse(c, 0, 1, 26, 11, '#aa73d620', '#be92de');
   c.translate(0, bob); c.scale(u.face || 1, 1);
   if (boss) c.scale(1.45, 1.45);
   const r = (x: number, y: number, w: number, h: number, color: string) => rect(c, x, y, w, h, color);
@@ -111,7 +112,13 @@ function miniature(c: Context, u: Unit, time: number) {
   r(-10, -2, 9, 4, '#152022'); r(3, -2, 10, 4, '#152022');
   r(-9, -28, 18, 16, main); r(-8, -28, 4, 14, light); r(-9, -13, 19, 4, '#34312d'); r(0, -13, 4, 4, '#b8a779');
   r(-8, -44, 17, 17, ink); r(-6, -42, 14, 14, '#c6a481'); r(0, -37, 9, 8, '#d9bc94'); r(5, -36, 3, 3, '#182323');
-  if (u.role === 'archer') {
+  if (u.role === 'support') {
+    r(-12, -46, 21, 9, '#d2dfba'); r(-10, -41, 6, 15, '#8cbb98');
+    r(-12, -28, 24, 21, '#5f937b'); r(-8, -27, 4, 20, '#cfdbb1');
+    r(12, -27, 8, 6, '#d9bc94'); r(20, -44, 3, 43, '#bcaa7b');
+    r(17, -47, 9, 9, '#93d9b7'); r(20, -50, 3, 15, '#e0efbd');
+    if(u.skillCast)ellipse(c,23,-43,11,11,'#9be6c533','#c2f6d7');
+  } else if (u.role === 'archer') {
     r(-10, -44, 16, 7, dark); r(-12, -40, 6, 19, main); r(-9, -43, 11, 3, light);
     r(-16, -33, 5, 22, '#5c4934'); line(c, [-14, -35, -18, -46], '#c2baa1', 2);
     r(9, -26, 10, 5, main); r(16, -25, 5, 5, '#d9bc94');
@@ -175,6 +182,8 @@ function draw(c: Context, base: HTMLCanvasElement, b: Battle, selected: Role, ho
     label(c, u.name, u.x, y - 5, u.team === 'ally' ? '#d2dfd2' : '#d2b39b', 11);
     rect(c, u.x - width / 2 - 1, y, width + 2, 6, '#0c191bee');
     rect(c, u.x - width / 2, y + 1, width * Math.max(0, u.hp / u.maxHp), 4, u.team === 'ally' ? '#80c9aa' : '#c28265');
+    const statuses=[(u.empowerUntil??0)>b.time?'攻击↑':'',(u.weakenUntil??0)>b.time?'虚弱↓':''].filter(Boolean);
+    if(statuses.length)label(c,statuses.join(' · '),u.x,y-20,'#dfc3eb',9);
     if (u.attack?.kind === 'heavy') label(c, '◆ 蓄力重击', u.x, u.y + 24, '#f0a38b', 11);
     else if (u.team === 'ally' && b.phase === 'running') label(c, u.intent, u.x, u.y + 24, '#adbeb0', 10);
   }

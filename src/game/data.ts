@@ -1,9 +1,10 @@
 import type { Role, Strategy, Upgrade } from './types';
-export const ROLES:Role[]=['guard','archer','assassin'];
+export const ROLES:Role[]=['guard','archer','assassin','support'];
 export const DEFAULT_STRATEGY:Strategy={target:'nearest',dodge:false,retreat:false,wait:false,protect:false};
 export const HEROES={
  guard:{name:'罗恩',title:'坚盾卫士',tag:'守护 · 近战',icon:'◆',color:'#77c7c1',hp:250,damage:18,range:44,speed:65,period:1.15,description:'用钢盾稳住战线，为队友创造出手机会。'},
  archer:{name:'莉娅',title:'逐风射手',tag:'远程 · 持续输出',icon:'⌁',color:'#d5bc79',hp:135,damage:24,range:225,speed:71,period:1.25,description:'保持安全距离，用箭矢锁定最重要的目标。'},
+ support:{name:'艾琳',title:'祷言司祭',tag:'治疗 · 增益 · 虚弱',icon:'✦',color:'#9fd7ab',hp:145,damage:6,range:200,speed:68,period:1.6,description:'以低伤害法杖普攻自卫，把握冷却与吟唱时机治疗队友、强化输出并削弱敌人。'},
  assassin:{name:'灰羽',title:'影刃斥候',tag:'突袭 · 爆发',icon:'⚔',color:'#a99bdd',hp:150,damage:22,range:39,speed:109,period:.8,description:'穿过战线的空隙，寻找脆弱的敌方后排。'}
 };
 export const UPGRADES:Record<Upgrade,{name:string;description:string;icon:string}>={

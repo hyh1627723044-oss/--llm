@@ -1,6 +1,7 @@
 import { DEFAULT_STRATEGY, ROLES } from './data';
+import { DEFAULT_SUPPORT, validateSupport } from './support';
 import type { Campaign, Proposal, Role, Upgrade } from './types';
-export function newCampaign():Campaign{return {version:1,stage:0,wins:0,rewardAvailable:false,rewardClaimed:false,outcome:null,heroes:{guard:{strategy:{...DEFAULT_STRATEGY},upgrades:[],slot:1},archer:{strategy:{...DEFAULT_STRATEGY},upgrades:[],slot:4},assassin:{strategy:{...DEFAULT_STRATEGY},upgrades:[],slot:2}}};}
+export function newCampaign():Campaign{return {version:1,stage:0,wins:0,rewardAvailable:false,rewardClaimed:false,outcome:null,heroes:{support:{strategy:{...DEFAULT_STRATEGY,support:{...DEFAULT_SUPPORT}},upgrades:[],slot:3},guard:{strategy:{...DEFAULT_STRATEGY},upgrades:[],slot:1},archer:{strategy:{...DEFAULT_STRATEGY},upgrades:[],slot:4},assassin:{strategy:{...DEFAULT_STRATEGY},upgrades:[],slot:2}}};}
 export function finishBattle(c:Campaign,result:'victory'|'defeat'){
  if(c.outcome!==null)return;
  c.outcome=result;c.rewardAvailable=result==='victory'&&c.stage<3;c.rewardClaimed=false;
@@ -24,10 +25,11 @@ export function nextEncounter(c:Campaign){if(c.outcome!=='victory'||!c.rewardCla
 export function restoreCampaign(raw:string):Campaign{
  const p=JSON.parse(raw);if(p?.version!==1||!Number.isInteger(p.stage)||p.stage<0||p.stage>3)throw new Error('存档版本无效');
  const c=newCampaign();const slots=new Set<number>();
- for(const r of ROLES){const h=p.heroes?.[r];if(!h||!Number.isInteger(h.slot)||h.slot<0||h.slot>5||slots.has(h.slot)||!Array.isArray(h.upgrades)||h.upgrades.length>3||h.upgrades.some((u:string)=>!['power','vitality','haste','dodge','counter','rally'].includes(u)))throw new Error('存档角色无效');slots.add(h.slot);
+ for(const r of ROLES){const h=p.heroes?.[r];if(r==='support'&&h===undefined)continue;if(!h||!Number.isInteger(h.slot)||h.slot<0||h.slot>5||slots.has(h.slot)||!Array.isArray(h.upgrades)||h.upgrades.length>3||h.upgrades.some((u:string)=>!['power','vitality','haste','dodge','counter','rally'].includes(u)))throw new Error('存档角色无效');slots.add(h.slot);
   const s=h.strategy;if(!s||!['nearest','ranged','weakest'].includes(s.target)||['dodge','retreat','wait','protect'].some(k=>typeof s[k]!=='boolean'))throw new Error('存档战术无效');
-  c.heroes[r]={slot:h.slot,upgrades:[...h.upgrades],strategy:{target:s.target,dodge:s.dodge,retreat:s.retreat,wait:s.wait,protect:s.protect}};
+  c.heroes[r]={slot:h.slot,upgrades:[...h.upgrades],strategy:{target:s.target,dodge:s.dodge,retreat:s.retreat,wait:s.wait,protect:s.protect,...(r==="support"?{support:s.support===undefined?{...DEFAULT_SUPPORT}:validateSupport(s.support)}:{})}};
  }
+ if(p.heroes?.support===undefined)c.heroes.support.slot=[0,1,2,3,4,5].find(slot=>!slots.has(slot))!;
  if(Object.values(c.heroes).reduce((s,h)=>s+h.upgrades.length,0)>3)throw new Error('存档强化超出限制');
  c.stage=p.stage;c.wins=Number.isInteger(p.wins)?Math.max(0,Math.min(4,p.wins)):0;
  c.outcome=['victory','defeat'].includes(p.outcome)?p.outcome:null;
