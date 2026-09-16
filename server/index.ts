@@ -38,5 +38,6 @@ const server=http.createServer(async(req,res)=>{
  res.writeHead(200,{'Content-Type':mime[path.extname(file)]||'application/octet-stream','X-Content-Type-Options':'nosniff'});createReadStream(file).pipe(res);
 });
 const port=Number(process.env.PORT||4173);
-server.listen(port,'127.0.0.1',()=>console.log(`Tactic Weaver: http://localhost:${port} (${apiKey?'DeepSeek':'local demo'})`));
+const host=process.env.HOST||'127.0.0.1';
+server.listen(port,host,()=>console.log(`Tactic Weaver: http://${host}:${port} (${apiKey?'DeepSeek':'local demo'})`));
 server.on('error',error=>{console.error(error.message);process.exitCode=1;});

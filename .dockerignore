@@ -1,0 +1,9 @@
+.git
+.deployment
+node_modules
+dist
+.env
+.env.*
+*.tar
+*.tar.gz
+*.log
